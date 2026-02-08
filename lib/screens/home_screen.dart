@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../theme/app_colors.dart';
 import '../utils/page_transitions.dart';
 import '../widgets/scale_on_tap.dart';
+import 'camera_screen.dart';
 import 'loading_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,6 +20,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _picker = ImagePicker();
+
+  Future<void> _navigateToCamera() async {
+    final errorMessage = await Navigator.of(context).push<String>(
+      SlideUpFadeRoute(page: const CameraScreen()),
+    );
+
+    if (errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.consRed,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: '확인',
+            textColor: Colors.white,
+            onPressed: () {},
+          ),
+        ),
+      );
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -183,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: ElevatedButton(
-                      onPressed: () => _pickImage(ImageSource.camera),
+                      onPressed: _navigateToCamera,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
