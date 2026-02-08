@@ -1,8 +1,13 @@
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../theme/app_colors.dart';
+import '../utils/page_transitions.dart';
+import '../widgets/scale_on_tap.dart';
 import 'loading_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -24,24 +29,26 @@ class _HomeScreenState extends State<HomeScreen> {
         imageQuality: 85,
       );
 
-      if (pickedFile == null) return; // 사용자가 취소
+      if (pickedFile == null) return;
       if (!mounted) return;
 
       final imageFile = File(pickedFile.path);
 
-      // 로딩 화면으로 이동, 에러 메시지가 돌아올 수 있음
       final errorMessage = await Navigator.of(context).push<String>(
-        MaterialPageRoute(
-          builder: (_) => LoadingScreen(imageFile: imageFile),
+        SlideUpFadeRoute(
+          page: LoadingScreen(imageFile: imageFile),
         ),
       );
 
-      // 에러 메시지가 있으면 SnackBar로 표시
       if (errorMessage != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
-            backgroundColor: Colors.red[700],
+            backgroundColor: AppColors.consRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: '확인',
@@ -56,7 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('이미지를 가져올 수 없습니다: $e'),
-          backgroundColor: Colors.red[700],
+          backgroundColor: AppColors.consRed,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       );
     }
@@ -64,72 +75,212 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('상품 리뷰 AI'),
-        backgroundColor: theme.colorScheme.inversePrimary,
-        centerTitle: true,
-      ),
-      body: Center(
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.shopping_bag_outlined,
-                size: 80,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                '상품 사진을 찍어주세요',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+              const Spacer(flex: 3),
+              // Emoji with soft radial glow
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.primaryBlue.withAlpha(30),
+                          AppColors.gradientEnd.withAlpha(10),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    '📦',
+                    style: TextStyle(fontSize: 64),
+                  ),
+                ],
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 500.ms,
+                    curve: Curves.easeOutBack,
+                  )
+                  .scale(
+                    begin: const Offset(0.8, 0.8),
+                    end: const Offset(1.0, 1.0),
+                    duration: 500.ms,
+                    curve: Curves.easeOutBack,
+                  ),
+              const SizedBox(height: 20),
+              // Title
+              const Text(
+                '상품을 찍어보세요',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
-              ),
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 400.ms,
+                    delay: 150.ms,
+                    curve: Curves.easeOutCubic,
+                  )
+                  .slideY(
+                    begin: 0.15,
+                    end: 0,
+                    duration: 400.ms,
+                    delay: 150.ms,
+                    curve: Curves.easeOutCubic,
+                  ),
               const SizedBox(height: 12),
-              Text(
-                'AI가 상품을 인식하고\n리뷰를 분석해 드립니다',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
+              // Subtitle
+              const Text(
+                'AI가 상품을 인식하고\n리뷰를 요약해 드려요',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
                 ),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 48),
-              // 카메라 버튼
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.camera),
-                  icon: const Icon(Icons.camera_alt, size: 28),
-                  label: const Text('카메라로 촬영', style: TextStyle(fontSize: 18)),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 400.ms,
+                    delay: 300.ms,
+                    curve: Curves.easeOutCubic,
+                  )
+                  .slideY(
+                    begin: 0.15,
+                    end: 0,
+                    duration: 400.ms,
+                    delay: 300.ms,
+                    curve: Curves.easeOutCubic,
+                  ),
+              const Spacer(flex: 3),
+              // Camera button: gradient
+              ScaleOnTap(
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.gradientStart,
+                          AppColors.gradientEnd,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt_rounded, size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            '카메라로 촬영',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              // 갤러리 버튼
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _pickImage(ImageSource.gallery),
-                  icon: const Icon(Icons.photo_library, size: 28),
-                  label: const Text('갤러리에서 선택', style: TextStyle(fontSize: 18)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 400.ms,
+                    delay: 500.ms,
+                    curve: Curves.easeOutCubic,
+                  )
+                  .slideY(
+                    begin: 0.15,
+                    end: 0,
+                    duration: 400.ms,
+                    delay: 500.ms,
+                    curve: Curves.easeOutCubic,
+                  ),
+              const SizedBox(height: 12),
+              // Gallery button: glass style
+              ScaleOnTap(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: OutlinedButton(
+                        onPressed: () => _pickImage(ImageSource.gallery),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.textPrimary,
+                          side: const BorderSide(
+                            color: AppColors.cardBorder,
+                          ),
+                          backgroundColor: AppColors.cardBg,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.photo_library_rounded,
+                                size: 22, color: AppColors.textSecondary),
+                            SizedBox(width: 8),
+                            Text(
+                              '갤러리에서 선택',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 400.ms,
+                    delay: 600.ms,
+                    curve: Curves.easeOutCubic,
+                  )
+                  .slideY(
+                    begin: 0.15,
+                    end: 0,
+                    duration: 400.ms,
+                    delay: 600.ms,
+                    curve: Curves.easeOutCubic,
+                  ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
